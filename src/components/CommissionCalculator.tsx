@@ -64,12 +64,25 @@ const CommissionCalculator = () => {
 
 
     const totalCommission = totalContractValue * commissionPercentage;
-    const initialCommission = totalMonthlyValue * 0.5; // 50% of first month
+    
+    // For renewals: no initial commission, spread total evenly over contract term
+    // For new business: 50% initial, then remainder spread over remaining months
+    let initialCommission = 0;
+    let monthlyResidual = 0;
+    
+    if (data.isRenewal) {
+      // Renewal: total commission spread evenly over entire contract term
+      monthlyResidual = totalCommission / data.contractLength;
+    } else {
+      // New business: 50% initial, remainder spread over remaining months
+      initialCommission = totalMonthlyValue * 0.5;
+      const adjustedTotalCommission = data.hasReferral ? totalCommission - 100 : totalCommission;
+      const residualAmount = Math.max(0, adjustedTotalCommission - initialCommission);
+      monthlyResidual = data.contractLength > 1 ? residualAmount / (data.contractLength - 1) : 0;
+    }
 
-    // Subtract referral bonus from total commission (affects residuals only)
-    const adjustedTotalCommission = data.hasReferral ? totalCommission - 100 : totalCommission;
-    const residualAmount = Math.max(0, adjustedTotalCommission - initialCommission);
-    const monthlyResidual = data.contractLength > 1 ? residualAmount / (data.contractLength - 1) : 0;
+    // Apply referral deduction for renewals (affects total commission)
+    const finalTotalCommission = data.hasReferral ? totalCommission - 100 : totalCommission;
 
     return {
       basePrice,
@@ -77,9 +90,8 @@ const CommissionCalculator = () => {
       totalMonthlyValue,
       totalContractValue,
       commissionPercentage: commissionPercentage * 100,
-      totalCommission: adjustedTotalCommission,
+      totalCommission: finalTotalCommission,
       initialCommission,
-      residualAmount,
       monthlyResidual,
       discountInfo: {
         termDiscount: data.contractLength === 12 ? 10 : 0,
@@ -289,28 +301,35 @@ const CommissionCalculator = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
-              <div className="p-4 bg-success/5 rounded-lg border border-success/20">
-                <div className="flex justify-between items-center">
-                  <span className="text-success font-semibold">Initial Commission (Paid Month 1):</span>
-                  <span className="text-2xl font-bold text-success font-mono">
-                    ${calculations.initialCommission.toFixed(2)}
-                  </span>
+              {calculations.initialCommission > 0 && (
+                <div className="p-4 bg-success/5 rounded-lg border border-success/20">
+                  <div className="flex justify-between items-center">
+                    <span className="text-success font-semibold">Initial Commission (Paid Month 1):</span>
+                    <span className="text-2xl font-bold text-success font-mono">
+                      ${calculations.initialCommission.toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    50% of first month's value (New business only)
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  50% of first month's value
-                </p>
-              </div>
+              )}
 
               {calculations.monthlyResidual > 0 && (
                 <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
                   <div className="flex justify-between items-center">
-                    <span className="text-primary font-semibold">Monthly Residual:</span>
+                    <span className="text-primary font-semibold">
+                      {data.isRenewal ? "Monthly Commission:" : "Monthly Residual:"}
+                    </span>
                     <span className="text-xl font-bold text-primary font-mono">
                       ${calculations.monthlyResidual.toFixed(2)}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Paid monthly for {data.contractLength - 1} months after campaign goes live
+                    {data.isRenewal 
+                      ? `Paid monthly for ${data.contractLength} months`
+                      : `Paid monthly for ${data.contractLength - 1} months after campaign goes live`
+                    }
                   </p>
                 </div>
               )}
