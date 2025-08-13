@@ -107,7 +107,7 @@ const CommissionCalculator = () => {
           <img 
             src="/lovable-uploads/8d058ccf-cc93-4021-b3ff-6b96d121cd3b.png" 
             alt="Arrows by C-Arrow Marketing Logo"
-            className="h-16 w-auto filter invert"
+            className="w-full max-w-2xl h-auto filter invert"
           />
         </div>
         <div className="flex items-center justify-center gap-2">
