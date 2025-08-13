@@ -291,7 +291,7 @@ const CommissionCalculator = () => {
           {/* Commission Results */}
           <Card className="shadow-elegant border-success">
             <CardHeader className="bg-gradient-to-r from-success/5 to-success/10 rounded-t-lg">
-              <CardTitle className="flex items-center gap-2 text-success">
+              <CardTitle className="flex items-center gap-2 text-foreground">
                 <Calendar className="h-5 w-5" />
                 Your Commission Earnings
               </CardTitle>
