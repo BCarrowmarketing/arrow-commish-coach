@@ -100,7 +100,7 @@ const CommissionCalculator = () => {
         </div>
         <div className="flex items-center justify-center gap-2">
           <Calculator className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">Commission Calculator</h1>
+          <h1 className="text-3xl font-bold text-foreground">Arrows Displays Sales Rep Commission Calculator</h1>
         </div>
         <p className="text-muted-foreground text-lg">
           Calculate your commission earnings for Arrows Displays campaigns
@@ -319,7 +319,7 @@ const CommissionCalculator = () => {
 
               <div className="p-4 bg-gradient-to-r from-accent/10 to-accent/5 rounded-lg border border-accent/30">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Total Year 1 Earnings:</span>
+                  <span className="text-lg font-semibold">Total Campaign Earnings (Year 1):</span>
                   <span className="text-3xl font-bold text-accent font-mono">
                     ${calculations.totalCommission.toFixed(2)}
                   </span>
