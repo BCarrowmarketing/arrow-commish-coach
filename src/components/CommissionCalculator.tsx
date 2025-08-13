@@ -327,7 +327,7 @@ const CommissionCalculator = () => {
                           } 
                         }));
                       }}
-                      className={`font-mono ${validationErrors.peakTime ? 'border-destructive' : ''}`}
+                      className={`font-mono ${validationErrors.peakTime ? 'border-muted-foreground' : ''}`}
                     />
                     {validationErrors.peakTime && (
                       <p className="text-xs text-muted-foreground">
@@ -384,7 +384,7 @@ const CommissionCalculator = () => {
                           } 
                         }));
                       }}
-                      className={`font-mono ${validationErrors.screenTakeover ? 'border-destructive' : ''}`}
+                      className={`font-mono ${validationErrors.screenTakeover ? 'border-muted-foreground' : ''}`}
                     />
                     {validationErrors.screenTakeover && (
                       <p className="text-xs text-muted-foreground">
