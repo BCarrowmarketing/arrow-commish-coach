@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { Resend } from "npm:resend@2.0.0"
+
+const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,29 +24,21 @@ serve(async (req) => {
     // Generate HTML report
     const htmlReport = generateHTMLReport(calculationData)
 
-    // Send email using your preferred email service
-    // For now, we'll use a placeholder response
-    // You would integrate with services like Resend, SendGrid, etc.
-    
-    const emailData = {
-      to: email,
-      from: 'sales@arrowsdisplays.com',
+    // Send email using Resend
+    const emailResponse = await resend.emails.send({
+      from: 'Arrows Displays <onboarding@resend.dev>',
+      to: [email],
       subject: 'Arrows Displays Commission Calculation Report',
       html: htmlReport,
-    }
+    })
 
-    // TODO: Integrate with actual email service
-    // const response = await sendEmail(emailData)
-
-    console.log('Email would be sent to:', email)
-    console.log('Report data:', calculationData)
+    console.log('Email sent successfully:', emailResponse)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Commission report sent successfully',
-        // For demo purposes, we'll return success
-        // In production, you'd send the actual email
+        emailId: emailResponse.data?.id
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
