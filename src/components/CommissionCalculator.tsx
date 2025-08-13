@@ -330,7 +330,7 @@ const CommissionCalculator = () => {
                       className={`font-mono ${validationErrors.peakTime ? 'border-destructive' : ''}`}
                     />
                     {validationErrors.peakTime && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-xs text-muted-foreground">
                         Cannot exceed {data.locations} location{data.locations !== 1 ? 's' : ''}
                       </p>
                     )}
@@ -387,7 +387,7 @@ const CommissionCalculator = () => {
                       className={`font-mono ${validationErrors.screenTakeover ? 'border-destructive' : ''}`}
                     />
                     {validationErrors.screenTakeover && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-xs text-muted-foreground">
                         Cannot exceed {data.locations} location{data.locations !== 1 ? 's' : ''}
                       </p>
                     )}
