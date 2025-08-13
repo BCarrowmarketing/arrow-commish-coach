@@ -58,6 +58,11 @@ const CommissionCalculator = () => {
     },
   });
 
+  const [validationErrors, setValidationErrors] = useState({
+    peakTime: false,
+    screenTakeover: false,
+  });
+
   const calculations = useMemo(() => {
     const basePrice = SPOT_PRICES[data.spotType];
     let monthlyRate = basePrice;
@@ -304,25 +309,31 @@ const CommissionCalculator = () => {
                       id="peakTimeLocations"
                       type="number"
                       min="1"
-                      max={data.locations}
                       value={data.addOns.peakTime.locations}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        const exceedsLimit = value > data.locations;
+                        
+                        setValidationErrors(prev => ({ ...prev, peakTime: exceedsLimit }));
+                        
                         setData((prev) => ({ 
                           ...prev, 
                           addOns: { 
                             ...prev.addOns, 
                             peakTime: { 
                               ...prev.addOns.peakTime, 
-                              locations: Math.min(parseInt(e.target.value) || 1, data.locations)
+                              locations: Math.min(value, data.locations)
                             } 
                           } 
-                        }))
-                      }
-                      className="font-mono"
+                        }));
+                      }}
+                      className={`font-mono ${validationErrors.peakTime ? 'border-destructive' : ''}`}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Max {data.locations} location{data.locations !== 1 ? 's' : ''}
-                    </p>
+                    {validationErrors.peakTime && (
+                      <p className="text-xs text-destructive">
+                        Cannot exceed {data.locations} location{data.locations !== 1 ? 's' : ''}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -355,25 +366,31 @@ const CommissionCalculator = () => {
                       id="screenTakeoverLocations"
                       type="number"
                       min="1"
-                      max={data.locations}
                       value={data.addOns.screenTakeover.locations}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        const exceedsLimit = value > data.locations;
+                        
+                        setValidationErrors(prev => ({ ...prev, screenTakeover: exceedsLimit }));
+                        
                         setData((prev) => ({ 
                           ...prev, 
                           addOns: { 
                             ...prev.addOns, 
                             screenTakeover: { 
                               ...prev.addOns.screenTakeover, 
-                              locations: Math.min(parseInt(e.target.value) || 1, data.locations)
+                              locations: Math.min(value, data.locations)
                             } 
                           } 
-                        }))
-                      }
-                      className="font-mono"
+                        }));
+                      }}
+                      className={`font-mono ${validationErrors.screenTakeover ? 'border-destructive' : ''}`}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Max {data.locations} location{data.locations !== 1 ? 's' : ''}
-                    </p>
+                    {validationErrors.screenTakeover && (
+                      <p className="text-xs text-destructive">
+                        Cannot exceed {data.locations} location{data.locations !== 1 ? 's' : ''}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
