@@ -339,7 +339,7 @@ const CommissionCalculator = () => {
               <div className="p-4 bg-gradient-to-r from-accent/10 to-accent/5 rounded-lg border border-accent/30">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">
-                    Total Campaign Earnings (Year {data.isRenewal ? data.renewalYear : 1}):
+                    Total Campaign Earnings (Year {data.isRenewal ? (data.renewalYear === 4 ? '4+' : data.renewalYear) : 1}):
                   </span>
                   <span className="text-3xl font-bold text-accent font-mono">
                     ${calculations.totalCommission.toFixed(2)}
