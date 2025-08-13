@@ -15,7 +15,6 @@ interface CommissionData {
   hasReferral: boolean;
   isRenewal: boolean;
   renewalYear: 2 | 3 | 4;
-  isProbationary: boolean;
 }
 
 const SPOT_PRICES = {
@@ -32,7 +31,6 @@ const CommissionCalculator = () => {
     hasReferral: false,
     isRenewal: false,
     renewalYear: 2,
-    isProbationary: false,
   });
 
   const calculations = useMemo(() => {
@@ -64,10 +62,6 @@ const CommissionCalculator = () => {
       else commissionPercentage = 0.1;
     }
 
-    // Apply probationary rates (50% reduction)
-    if (data.isProbationary) {
-      commissionPercentage *= 0.5;
-    }
 
     const totalCommission = totalContractValue * commissionPercentage;
     const initialCommission = totalMonthlyValue * 0.5; // 50% of first month
@@ -96,8 +90,15 @@ const CommissionCalculator = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 mb-4">
+      <div className="text-center space-y-6">
+        <div className="flex items-center justify-center mb-6">
+          <img 
+            src="/lovable-uploads/8d058ccf-cc93-4021-b3ff-6b96d121cd3b.png" 
+            alt="Arrows by C-Arrow Marketing Logo"
+            className="h-16 w-auto"
+          />
+        </div>
+        <div className="flex items-center justify-center gap-2">
           <Calculator className="h-8 w-8 text-primary" />
           <h1 className="text-3xl font-bold text-foreground">Commission Calculator</h1>
         </div>
@@ -222,18 +223,6 @@ const CommissionCalculator = () => {
                 </div>
               )}
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="isProbationary"
-                  checked={data.isProbationary}
-                  onCheckedChange={(checked) =>
-                    setData((prev) => ({ ...prev, isProbationary: !!checked }))
-                  }
-                />
-                <Label htmlFor="isProbationary" className="text-sm">
-                  Probationary rates (50% reduction)
-                </Label>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -296,7 +285,6 @@ const CommissionCalculator = () => {
               </CardTitle>
               <CardDescription>
                 Commission rate: {calculations.commissionPercentage.toFixed(1)}%
-                {data.isProbationary && " (Probationary)"}
                 {data.isRenewal && ` (Year ${data.renewalYear} Renewal)`}
               </CardDescription>
             </CardHeader>
