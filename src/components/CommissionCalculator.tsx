@@ -15,12 +15,27 @@ interface CommissionData {
   hasReferral: boolean;
   isRenewal: boolean;
   renewalYear: 2 | 3 | 4;
+  addOns: {
+    peakTime: {
+      enabled: boolean;
+      locations: number;
+    };
+    screenTakeover: {
+      enabled: boolean;
+      locations: number;
+    };
+  };
 }
 
 const SPOT_PRICES = {
   "10": 100,
   "20": 150,
   "30": 200,
+};
+
+const ADD_ON_PRICES = {
+  peakTime: 50,
+  screenTakeover: 50,
 };
 
 const CommissionCalculator = () => {
@@ -31,6 +46,16 @@ const CommissionCalculator = () => {
     hasReferral: false,
     isRenewal: false,
     renewalYear: 2,
+    addOns: {
+      peakTime: {
+        enabled: false,
+        locations: 1,
+      },
+      screenTakeover: {
+        enabled: false,
+        locations: 1,
+      },
+    },
   });
 
   const calculations = useMemo(() => {
@@ -51,7 +76,65 @@ const CommissionCalculator = () => {
       monthlyRate *= 0.85; // Additional 15% off
     }
 
-    const totalMonthlyValue = monthlyRate * data.locations;
+    // Calculate add-ons with same discounts
+    let addOnMonthlyValue = 0;
+    let addOnDetails = {
+      peakTime: { enabled: false, locations: 0, monthlyValue: 0 },
+      screenTakeover: { enabled: false, locations: 0, monthlyValue: 0 },
+    };
+
+    if (data.addOns.peakTime.enabled && data.addOns.peakTime.locations > 0) {
+      let peakTimeRate = ADD_ON_PRICES.peakTime;
+      
+      // Apply same discounts as base pricing
+      if (data.contractLength === 12) {
+        peakTimeRate *= 0.9; // 10% off
+      }
+      
+      if (data.locations >= 2 && data.locations <= 5) {
+        peakTimeRate *= 0.95; // Additional 5% off
+      } else if (data.locations >= 6 && data.locations <= 10) {
+        peakTimeRate *= 0.9; // Additional 10% off
+      } else if (data.locations >= 11) {
+        peakTimeRate *= 0.85; // Additional 15% off
+      }
+      
+      const peakTimeMonthlyValue = peakTimeRate * data.addOns.peakTime.locations;
+      addOnMonthlyValue += peakTimeMonthlyValue;
+      addOnDetails.peakTime = {
+        enabled: true,
+        locations: data.addOns.peakTime.locations,
+        monthlyValue: peakTimeMonthlyValue,
+      };
+    }
+
+    if (data.addOns.screenTakeover.enabled && data.addOns.screenTakeover.locations > 0) {
+      let screenTakeoverRate = ADD_ON_PRICES.screenTakeover;
+      
+      // Apply same discounts as base pricing
+      if (data.contractLength === 12) {
+        screenTakeoverRate *= 0.9; // 10% off
+      }
+      
+      if (data.locations >= 2 && data.locations <= 5) {
+        screenTakeoverRate *= 0.95; // Additional 5% off
+      } else if (data.locations >= 6 && data.locations <= 10) {
+        screenTakeoverRate *= 0.9; // Additional 10% off
+      } else if (data.locations >= 11) {
+        screenTakeoverRate *= 0.85; // Additional 15% off
+      }
+      
+      const screenTakeoverMonthlyValue = screenTakeoverRate * data.addOns.screenTakeover.locations;
+      addOnMonthlyValue += screenTakeoverMonthlyValue;
+      addOnDetails.screenTakeover = {
+        enabled: true,
+        locations: data.addOns.screenTakeover.locations,
+        monthlyValue: screenTakeoverMonthlyValue,
+      };
+    }
+
+    const baseMonthlyValue = monthlyRate * data.locations;
+    const totalMonthlyValue = baseMonthlyValue + addOnMonthlyValue;
     const totalContractValue = totalMonthlyValue * data.contractLength;
 
     // Calculate commission percentages based on renewal year
@@ -87,12 +170,15 @@ const CommissionCalculator = () => {
     return {
       basePrice,
       monthlyRatePerLocation: monthlyRate,
+      baseMonthlyValue,
+      addOnMonthlyValue,
       totalMonthlyValue,
       totalContractValue,
       commissionPercentage: commissionPercentage * 100,
       totalCommission: finalTotalCommission,
       initialCommission,
       monthlyResidual,
+      addOnDetails,
       discountInfo: {
         termDiscount: data.contractLength === 12 ? 10 : 0,
         locationDiscount: data.locations >= 11 ? 15 : data.locations >= 6 ? 10 : data.locations >= 2 ? 5 : 0,
@@ -186,7 +272,117 @@ const CommissionCalculator = () => {
             <Separator />
 
             <div className="space-y-4">
-              <h3 className="font-semibold text-foreground">Additional Options</h3>
+              <h3 className="font-semibold text-foreground">Product Add-Ons</h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="peakTime"
+                    checked={data.addOns.peakTime.enabled}
+                    onCheckedChange={(checked) =>
+                      setData((prev) => ({ 
+                        ...prev, 
+                        addOns: { 
+                          ...prev.addOns, 
+                          peakTime: { 
+                            ...prev.addOns.peakTime, 
+                            enabled: !!checked 
+                          } 
+                        } 
+                      }))
+                    }
+                  />
+                  <Label htmlFor="peakTime" className="text-sm">
+                    Peak Time Upgrade (+$50/location) - Priority scheduling during high-traffic hours
+                  </Label>
+                </div>
+
+                {data.addOns.peakTime.enabled && (
+                  <div className="space-y-2 ml-6">
+                    <Label htmlFor="peakTimeLocations">Number of Locations for Peak Time</Label>
+                    <Input
+                      id="peakTimeLocations"
+                      type="number"
+                      min="1"
+                      max={data.locations}
+                      value={data.addOns.peakTime.locations}
+                      onChange={(e) =>
+                        setData((prev) => ({ 
+                          ...prev, 
+                          addOns: { 
+                            ...prev.addOns, 
+                            peakTime: { 
+                              ...prev.addOns.peakTime, 
+                              locations: Math.min(parseInt(e.target.value) || 1, data.locations)
+                            } 
+                          } 
+                        }))
+                      }
+                      className="font-mono"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Max {data.locations} location{data.locations !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="screenTakeover"
+                    checked={data.addOns.screenTakeover.enabled}
+                    onCheckedChange={(checked) =>
+                      setData((prev) => ({ 
+                        ...prev, 
+                        addOns: { 
+                          ...prev.addOns, 
+                          screenTakeover: { 
+                            ...prev.addOns.screenTakeover, 
+                            enabled: !!checked 
+                          } 
+                        } 
+                      }))
+                    }
+                  />
+                  <Label htmlFor="screenTakeover" className="text-sm">
+                    Screen Takeover (+$50/location) - Full screen visibility for maximum impact
+                  </Label>
+                </div>
+
+                {data.addOns.screenTakeover.enabled && (
+                  <div className="space-y-2 ml-6">
+                    <Label htmlFor="screenTakeoverLocations">Number of Locations for Screen Takeover</Label>
+                    <Input
+                      id="screenTakeoverLocations"
+                      type="number"
+                      min="1"
+                      max={data.locations}
+                      value={data.addOns.screenTakeover.locations}
+                      onChange={(e) =>
+                        setData((prev) => ({ 
+                          ...prev, 
+                          addOns: { 
+                            ...prev.addOns, 
+                            screenTakeover: { 
+                              ...prev.addOns.screenTakeover, 
+                              locations: Math.min(parseInt(e.target.value) || 1, data.locations)
+                            } 
+                          } 
+                        }))
+                      }
+                      className="font-mono"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Max {data.locations} location{data.locations !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h3 className="font-semibold text-foreground">Commission Adjustments</h3>
               
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -275,6 +471,32 @@ const CommissionCalculator = () => {
                 <span>Final Rate per Location:</span>
                 <span className="font-mono">${calculations.monthlyRatePerLocation.toFixed(2)}/month</span>
               </div>
+              
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Base Monthly Value:</span>
+                <span className="font-mono font-semibold">${calculations.baseMonthlyValue.toFixed(2)}</span>
+              </div>
+              
+              {calculations.addOnMonthlyValue > 0 && (
+                <>
+                  {calculations.addOnDetails.peakTime.enabled && (
+                    <div className="flex justify-between text-accent">
+                      <span>Peak Time ({calculations.addOnDetails.peakTime.locations} location{calculations.addOnDetails.peakTime.locations !== 1 ? 's' : ''}):</span>
+                      <span className="font-mono">+${calculations.addOnDetails.peakTime.monthlyValue.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {calculations.addOnDetails.screenTakeover.enabled && (
+                    <div className="flex justify-between text-accent">
+                      <span>Screen Takeover ({calculations.addOnDetails.screenTakeover.locations} location{calculations.addOnDetails.screenTakeover.locations !== 1 ? 's' : ''}):</span>
+                      <span className="font-mono">+${calculations.addOnDetails.screenTakeover.monthlyValue.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Add-Ons Monthly Value:</span>
+                    <span className="font-mono font-semibold">${calculations.addOnMonthlyValue.toFixed(2)}</span>
+                  </div>
+                </>
+              )}
               
               <div className="flex justify-between text-xl font-bold text-primary">
                 <span>Total Monthly Value:</span>
