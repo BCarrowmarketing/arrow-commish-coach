@@ -295,7 +295,7 @@ const CommissionCalculator = () => {
                 <Calendar className="h-5 w-5" />
                 Your Commission Earnings
               </CardTitle>
-              <CardDescription className="text-foreground">
+              <CardDescription>
                 Commission rate: {calculations.commissionPercentage.toFixed(1)}%
                 {data.isRenewal && ` (Year ${data.renewalYear === 4 ? '4+' : data.renewalYear} Renewal)`}
               </CardDescription>
