@@ -293,7 +293,7 @@ const CommissionCalculator = () => {
                     }
                   />
                   <Label htmlFor="peakTime" className="text-sm">
-                    Peak Time Upgrade (+$50/location) - Priority scheduling during high-traffic hours
+                    Peak Time Upgrade (+$50/location)
                   </Label>
                 </div>
 
@@ -344,7 +344,7 @@ const CommissionCalculator = () => {
                     }
                   />
                   <Label htmlFor="screenTakeover" className="text-sm">
-                    Screen Takeover (+$50/location) - Full screen visibility for maximum impact
+                    Screen Takeover (+$50/location)
                   </Label>
                 </div>
 
