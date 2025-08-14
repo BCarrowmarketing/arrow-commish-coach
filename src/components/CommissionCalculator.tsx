@@ -370,9 +370,6 @@ const CommissionCalculator = () => {
               <Button variant="outline" onClick={() => setCustomerDataDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={handlePrint}>
-                Print Report
-              </Button>
               <Button onClick={handleEmailFlow}>
                 Continue to Email
               </Button>
