@@ -441,16 +441,16 @@ const CommissionCalculator = () => {
         </Dialog>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6 print:grid-cols-1 print:gap-2 print:block">
+      <div className="grid lg:grid-cols-2 gap-6 print:block print:space-y-4">
         {/* Input Form */}
-        <Card className="shadow-soft print:shadow-none print:border print:border-gray-300 print:compact print:mb-4">
-          <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-t-lg print:bg-white print:border-b print:border-gray-300 print:p-2">
-            <CardTitle className="flex items-center gap-2 print:text-black print:compact-title">
+        <Card className="shadow-soft print:shadow-none print:border print:border-gray-300 print:mb-4 print:break-inside-avoid">
+          <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-t-lg print:bg-white print:border-b print:border-gray-300 print:p-3">
+            <CardTitle className="flex items-center gap-2 print:text-black print:text-lg print:font-bold">
               <DollarSign className="h-5 w-5 print:text-black print:h-4 print:w-4" />
               Campaign Details
             </CardTitle>
-            <CardDescription className="print:text-gray-600 print:text-sm print:block">
-              Enter the campaign specifications to calculate your commission
+            <CardDescription className="print:text-gray-600 print:text-sm">
+              Campaign specifications and settings
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-6 print:space-y-2 print:pt-2 print:p-2">
@@ -684,11 +684,11 @@ const CommissionCalculator = () => {
         </Card>
 
         {/* Results */}
-        <div className="space-y-6 print:space-y-2">
+        <div className="space-y-6 print:space-y-2 print:block">
           {/* Pricing Breakdown */}
-          <Card className="shadow-soft print:shadow-none print:border print:border-gray-300 print:compact">
-            <CardHeader className="bg-gradient-to-r from-accent/5 to-accent/10 rounded-t-lg print:bg-white print:border-b print:border-gray-300 print:p-2">
-              <CardTitle className="flex items-center gap-2 print:text-black print:compact-title">
+          <Card className="shadow-soft print:shadow-none print:border print:border-gray-300 print:mb-4 print:break-inside-avoid print:block">
+            <CardHeader className="bg-gradient-to-r from-accent/5 to-accent/10 rounded-t-lg print:bg-white print:border-b print:border-gray-300 print:p-3">
+              <CardTitle className="flex items-center gap-2 print:text-black print:text-lg print:font-bold">
                 <TrendingUp className="h-5 w-5 print:text-black print:h-4 print:w-4" />
                 Pricing Breakdown
               </CardTitle>
@@ -759,13 +759,13 @@ const CommissionCalculator = () => {
           </Card>
 
           {/* Commission Results */}
-          <Card className="shadow-elegant border-success print:shadow-none print:border print:border-gray-300 print:compact">
-            <CardHeader className="bg-gradient-to-r from-success/5 to-success/10 rounded-t-lg print:bg-white print:border-b print:border-gray-300 print:p-2">
-              <CardTitle className="flex items-center gap-2 text-foreground print:text-black print:compact-title">
+          <Card className="shadow-elegant border-success print:shadow-none print:border print:border-gray-300 print:mb-4 print:break-inside-avoid print:block">
+            <CardHeader className="bg-gradient-to-r from-success/5 to-success/10 rounded-t-lg print:bg-white print:border-b print:border-gray-300 print:p-3">
+              <CardTitle className="flex items-center gap-2 text-foreground print:text-black print:text-lg print:font-bold">
                 <Calendar className="h-5 w-5 print:text-black print:h-4 print:w-4" />
                 Your Commission Earnings
               </CardTitle>
-              <CardDescription className="print:text-gray-600 print:text-sm print:hidden">
+              <CardDescription className="print:text-gray-600 print:text-sm">
                 Commission rate: {calculations.commissionPercentage.toFixed(1)}%
                 {data.isRenewal && ` (Year ${data.renewalYear === 4 ? '4+' : data.renewalYear} Renewal)`}
               </CardDescription>
