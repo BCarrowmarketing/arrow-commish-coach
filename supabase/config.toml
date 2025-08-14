@@ -1,1 +1,4 @@
 project_id = "yprowuaupnwspobugmox"
+
+[functions.send-commission-report]
+verify_jwt = false
