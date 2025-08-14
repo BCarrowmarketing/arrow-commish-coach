@@ -205,7 +205,7 @@ const CommissionCalculator = () => {
   }, [data]);
 
   const handlePrint = () => {
-    setCustomerDataDialog(true);
+    window.print();
   };
 
   const handleActualPrint = () => {
