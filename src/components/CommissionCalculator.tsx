@@ -270,13 +270,6 @@ const CommissionCalculator = () => {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6 print:p-2 print:space-y-2">
       <div className="text-center space-y-6 print:space-y-2 print:mb-2">
-        <div className="flex items-center justify-center mb-6 print:mb-2">
-          <img 
-            src="/lovable-uploads/8d058ccf-cc93-4021-b3ff-6b96d121cd3b.png" 
-            alt="Arrows by C-Arrow Marketing Logo"
-            className="w-full max-w-2xl h-auto filter invert print:filter-none print:max-w-sm print:h-16"
-          />
-        </div>
         <div className="flex items-center justify-center gap-2 print:gap-1 print:mb-2">
           <Calculator className="h-8 w-8 text-primary print:h-4 print:w-4 print:text-black" />
           <h1 className="text-3xl font-bold text-foreground print:text-lg print:text-black">Arrows Displays Sales Rep Commission Calculator</h1>
