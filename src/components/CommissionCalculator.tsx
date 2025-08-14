@@ -272,7 +272,7 @@ const CommissionCalculator = () => {
       <div className="text-center space-y-6 print:space-y-2 print:mb-2">
         <div className="flex items-center justify-center mb-6 print:mb-2">
           <img 
-            src="/lovable-uploads/8d058ccf-cc93-4021-b3ff-6b96d121cd3b.png" 
+            src={`${import.meta.env.BASE_URL}lovable-uploads/8d058ccf-cc93-4021-b3ff-6b96d121cd3b.png`}
             alt="Arrows by C-Arrow Marketing Logo"
             className="w-full max-w-2xl h-auto filter invert print:filter-none print:max-w-sm print:h-16"
           />
