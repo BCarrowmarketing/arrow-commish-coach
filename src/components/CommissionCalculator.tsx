@@ -441,15 +441,15 @@ const CommissionCalculator = () => {
         </Dialog>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6 print:grid-cols-1 print:gap-2">
+      <div className="grid lg:grid-cols-2 gap-6 print:grid-cols-1 print:gap-2 print:block">
         {/* Input Form */}
-        <Card className="shadow-soft print:shadow-none print:border print:border-gray-300 print:compact">
+        <Card className="shadow-soft print:shadow-none print:border print:border-gray-300 print:compact print:mb-4">
           <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-t-lg print:bg-white print:border-b print:border-gray-300 print:p-2">
             <CardTitle className="flex items-center gap-2 print:text-black print:compact-title">
               <DollarSign className="h-5 w-5 print:text-black print:h-4 print:w-4" />
               Campaign Details
             </CardTitle>
-            <CardDescription className="print:text-gray-600 print:text-sm print:hidden">
+            <CardDescription className="print:text-gray-600 print:text-sm print:block">
               Enter the campaign specifications to calculate your commission
             </CardDescription>
           </CardHeader>
