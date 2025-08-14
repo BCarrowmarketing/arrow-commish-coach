@@ -46,6 +46,12 @@ const CommissionCalculator = () => {
   const [emailDialog, setEmailDialog] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
   const [isEmailSending, setIsEmailSending] = useState(false);
+  const [customerDataDialog, setCustomerDataDialog] = useState(false);
+  const [customerData, setCustomerData] = useState({
+    businessName: "",
+    dateProposalSigned: "",
+    collectedAmount: ""
+  });
   const [data, setData] = useState<CommissionData>({
     spotType: "20",
     locations: 1,
@@ -199,7 +205,12 @@ const CommissionCalculator = () => {
   }, [data]);
 
   const handlePrint = () => {
-    window.print();
+    setCustomerDataDialog(true);
+  };
+
+  const handleActualPrint = () => {
+    setCustomerDataDialog(false);
+    setTimeout(() => window.print(), 100);
   };
 
   const handleEmailReport = async () => {
@@ -219,6 +230,7 @@ const CommissionCalculator = () => {
       const reportData = {
         email: emailAddress,
         calculationData: {
+          customerData,
           spotType: data.spotType,
           locations: data.locations,
           contractLength: data.contractLength,
@@ -234,6 +246,8 @@ const CommissionCalculator = () => {
             initialCommission: calculations.initialCommission.toFixed(2),
             monthlyResidual: calculations.monthlyResidual.toFixed(2),
             totalCommission: calculations.totalCommission.toFixed(2),
+            baseMonthlyRate: calculations.baseMonthlyValue.toFixed(2),
+            addOnMonthlyRate: calculations.addOnMonthlyValue.toFixed(2),
           }
         }
       };
@@ -285,6 +299,33 @@ const CommissionCalculator = () => {
           Calculate your commission earnings for Arrows Displays campaigns
         </p>
         
+        {/* Customer Data Section - Visible in print */}
+        {(customerData.businessName || customerData.dateProposalSigned || customerData.collectedAmount) && (
+          <div className="print:block hidden bg-gray-50 p-4 rounded-lg border mb-6">
+            <h2 className="text-xl font-bold text-black mb-4">Customer Information</h2>
+            <div className="grid grid-cols-3 gap-4">
+              {customerData.businessName && (
+                <div>
+                  <h3 className="font-semibold text-black">Business Name:</h3>
+                  <p className="text-gray-700">{customerData.businessName}</p>
+                </div>
+              )}
+              {customerData.dateProposalSigned && (
+                <div>
+                  <h3 className="font-semibold text-black">Date Proposal Signed:</h3>
+                  <p className="text-gray-700">{customerData.dateProposalSigned}</p>
+                </div>
+              )}
+              {customerData.collectedAmount && (
+                <div>
+                  <h3 className="font-semibold text-black">Collected Amount:</h3>
+                  <p className="text-gray-700">{customerData.collectedAmount}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Action Buttons - Hidden in print */}
         <div className="flex justify-center gap-4 print:hidden">
           <Button onClick={handlePrint} variant="outline" className="flex items-center gap-2">
@@ -293,45 +334,113 @@ const CommissionCalculator = () => {
           </Button>
           <Dialog open={emailDialog} onOpenChange={setEmailDialog}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
+              <Button className="flex items-center gap-2" onClick={() => setCustomerDataDialog(true)}>
                 <Mail className="h-4 w-4" />
                 Email Report
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Email Commission Report</DialogTitle>
-                <DialogDescription>
-                  Enter your email address to receive a PDF copy of your commission calculation.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-right">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your.email@company.com"
-                    value={emailAddress}
-                    onChange={(e) => setEmailAddress(e.target.value)}
-                    className="col-span-3"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button 
-                  onClick={handleEmailReport} 
-                  disabled={isEmailSending}
-                  className="w-full"
-                >
-                  {isEmailSending ? "Sending..." : "Send Report"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
           </Dialog>
         </div>
+
+        {/* Customer Data Dialog */}
+        <Dialog open={customerDataDialog} onOpenChange={setCustomerDataDialog}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Customer Information</DialogTitle>
+              <DialogDescription>
+                Add customer details to include in your commission report (optional).
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="businessName" className="text-right">
+                  Business Name
+                </Label>
+                <Input
+                  id="businessName"
+                  placeholder="ABC Company Inc."
+                  value={customerData.businessName}
+                  onChange={(e) => setCustomerData(prev => ({ ...prev, businessName: e.target.value }))}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="dateProposalSigned" className="text-right">
+                  Date Signed
+                </Label>
+                <Input
+                  id="dateProposalSigned"
+                  type="date"
+                  value={customerData.dateProposalSigned}
+                  onChange={(e) => setCustomerData(prev => ({ ...prev, dateProposalSigned: e.target.value }))}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="collectedAmount" className="text-right">
+                  Amount Collected
+                </Label>
+                <Input
+                  id="collectedAmount"
+                  placeholder="$5,000.00"
+                  value={customerData.collectedAmount}
+                  onChange={(e) => setCustomerData(prev => ({ ...prev, collectedAmount: e.target.value }))}
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <DialogFooter className="flex gap-2">
+              <Button variant="outline" onClick={() => setCustomerDataDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleActualPrint}>
+                Print Report
+              </Button>
+              <Button onClick={() => {
+                setCustomerDataDialog(false);
+                setEmailDialog(true);
+              }}>
+                Continue to Email
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Dialog */}
+        <Dialog open={emailDialog} onOpenChange={setEmailDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Email Commission Report</DialogTitle>
+              <DialogDescription>
+                Enter your email address to receive a copy of your commission calculation.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your.email@company.com"
+                  value={emailAddress}
+                  onChange={(e) => setEmailAddress(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                onClick={handleEmailReport} 
+                disabled={isEmailSending}
+                className="w-full"
+              >
+                {isEmailSending ? "Sending..." : "Send Report"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6 print:grid-cols-1 print:gap-2">
