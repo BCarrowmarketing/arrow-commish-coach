@@ -87,28 +87,85 @@ function generateHTMLReport(data: any) {
     h1 { color: #333; font-size: 24px; margin-bottom: 10px; }
     h2 { color: #333; font-size: 20px; margin: 30px 0 15px 0; border-bottom: 2px solid #333; padding-bottom: 8px; }
     h3 { color: #333; font-size: 16px; margin: 20px 0 10px 0; border-bottom: 1px solid #666; padding-bottom: 5px; }
-    .customer-info { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #333; }
-    .customer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .customer-item h3 { border: none; margin: 0 0 5px 0; font-size: 14px; font-weight: bold; color: #555; }
+    .customer-info { 
+      background: #F8F9FA; 
+      padding: 20px; 
+      border-radius: 8px; 
+      margin-bottom: 30px; 
+      border-left: 4px solid #6B46C1; 
+    }
+    .customer-grid { 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 20px; 
+    }
+    .customer-item h3 { 
+      border: none; 
+      margin: 0 0 5px 0; 
+      font-size: 14px; 
+      font-weight: bold; 
+      color: #6B46C1; 
+    }
     .customer-item p { margin: 0; font-size: 16px; color: #333; }
     .section { margin-bottom: 25px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff; }
     .details { display: flex; justify-content: space-between; margin: 12px 0; padding: 8px 0; border-bottom: 1px solid #eee; }
     .details:last-child { border-bottom: none; }
     .details span:first-child { font-weight: 500; color: #555; }
     .details span:last-child { font-weight: bold; color: #333; }
-    .highlight { background: #f0f8ff; padding: 15px; border-radius: 8px; font-weight: bold; border-left: 4px solid #007bff; margin-top: 15px; }
-    .add-ons { background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 10px 0; }
-    .add-ons h4 { margin: 0 0 10px 0; color: #333; font-size: 14px; }
-    .add-on-item { margin: 5px 0; padding: 5px 0; border-bottom: 1px solid #ddd; }
-    .add-on-item:last-child { border-bottom: none; }
-    .disclaimer { background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin-top: 30px; border-left: 4px solid #ffc107; }
-    .disclaimer strong { color: #856404; }
+    .highlight { 
+      background: linear-gradient(135deg, #EEF2FF, #E0E7FF); 
+      padding: 20px; 
+      border-radius: 8px; 
+      font-weight: bold; 
+      border-left: 4px solid #6B46C1; 
+      margin-top: 15px; 
+    }
+    .total-earnings {
+      font-size: 24px;
+      color: #6B46C1;
+      text-align: center;
+      font-weight: bold;
+    }
+    .disclaimer { 
+      background: #FFF3CD; 
+      border: 1px solid #FFEAA7; 
+      padding: 20px; 
+      border-radius: 8px; 
+      margin-top: 30px; 
+      border-left: 4px solid #FFC107; 
+    }
+    .add-ons { 
+      background: #F3F4F6; 
+      padding: 15px; 
+      border-radius: 6px; 
+      margin: 15px 0; 
+      border-left: 3px solid #6B46C1;
+    }
+    .add-ons h4 { 
+      margin: 0 0 10px 0; 
+      color: #6B46C1; 
+      font-size: 14px; 
+      font-weight: bold;
+    }
+    .add-on-item { 
+      margin: 8px 0; 
+      padding: 8px 12px; 
+      background: white;
+      border-radius: 4px;
+      border-left: 2px solid #6B46C1;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Arrows Displays Commission Report</h1>
-    <p style="margin: 0; color: #666; font-size: 14px;">Generated on ${new Date().toLocaleDateString()}</p>
+  <div class="company-header">
+    <div class="company-name">Arrows Displays</div>
+    <div class="report-title">Commission Calculation Report</div>
+    <div class="report-date">Generated on ${new Date().toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    })}</div>
   </div>
 
   ${data.customerData && (data.customerData.businessName || data.customerData.dateProposalSigned || data.customerData.collectedAmount) ? `
@@ -212,9 +269,9 @@ function generateHTMLReport(data: any) {
     </div>
     ` : ''}
     <div class="highlight">
-      <div class="details" style="border: none;">
+      <div class="details" style="border: none; margin-bottom: 10px;">
         <span>Total Campaign Earnings:</span>
-        <span style="font-size: 18px; color: #007bff;">$${data.calculations.totalCommission}</span>
+        <span class="total-earnings">$${data.calculations.totalCommission}</span>
       </div>
     </div>
   </div>
