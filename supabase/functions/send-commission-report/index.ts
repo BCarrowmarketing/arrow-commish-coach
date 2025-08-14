@@ -29,7 +29,7 @@ serve(async (req) => {
     
     // Send email using Resend
     const emailResponse = await resend.emails.send({
-      from: 'Arrows Displays <onboarding@resend.dev>',
+      from: 'Arrows Displays <noreply@arrowsdisplays.com>',
       to: [email],
       subject: 'Arrows Displays Commission Calculation Report',
       html: htmlReport,
