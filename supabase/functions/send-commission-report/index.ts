@@ -24,6 +24,9 @@ serve(async (req) => {
     // Generate HTML report
     const htmlReport = generateHTMLReport(calculationData)
 
+    console.log('Sending email to:', email)
+    console.log('RESEND_API_KEY available:', !!Deno.env.get('RESEND_API_KEY'))
+    
     // Send email using Resend
     const emailResponse = await resend.emails.send({
       from: 'Arrows Displays <onboarding@resend.dev>',
