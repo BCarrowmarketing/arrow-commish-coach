@@ -204,6 +204,10 @@ const CommissionCalculator = () => {
     };
   }, [data]);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const handleCustomerDetails = () => {
     // Auto-populate collected amount with total monthly value
     setCustomerData(prev => ({
@@ -211,11 +215,6 @@ const CommissionCalculator = () => {
       collectedAmount: calculations.totalMonthlyValue.toFixed(2)
     }));
     setCustomerDataDialog(true);
-  };
-
-  const handlePrint = () => {
-    setCustomerDataDialog(false);
-    setTimeout(() => window.print(), 100);
   };
 
   const handleEmailFlow = () => {
@@ -308,38 +307,15 @@ const CommissionCalculator = () => {
           Calculate your commission earnings for Arrows Displays campaigns
         </p>
         
-        {/* Customer Data Section - Visible in print */}
-        {(customerData.businessName || customerData.dateProposalSigned || customerData.collectedAmount) && (
-          <div className="hidden print:block bg-gray-50 p-4 rounded-lg border mb-6">
-            <h2 className="text-xl font-bold text-black mb-4">Customer Information</h2>
-            <div className="grid grid-cols-3 gap-4 text-black">
-              {customerData.businessName && (
-                <div>
-                  <h3 className="font-semibold">Business Name:</h3>
-                  <p>{customerData.businessName}</p>
-                </div>
-              )}
-              {customerData.dateProposalSigned && (
-                <div>
-                  <h3 className="font-semibold">Date Proposal Signed:</h3>
-                  <p>{customerData.dateProposalSigned}</p>
-                </div>
-              )}
-              {customerData.collectedAmount && (
-                <div>
-                  <h3 className="font-semibold">Collected Amount:</h3>
-                  <p>{customerData.collectedAmount}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Action Buttons - Hidden in print */}
         <div className="flex justify-center gap-4 print:hidden">
+          <Button onClick={handlePrint} variant="outline" className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            Print Report
+          </Button>
           <Button onClick={handleCustomerDetails} className="flex items-center gap-2">
-            <Calculator className="h-4 w-4" />
-            Add Customer Details & Generate Report
+            <Mail className="h-4 w-4" />
+            Email Report
           </Button>
         </div>
 
