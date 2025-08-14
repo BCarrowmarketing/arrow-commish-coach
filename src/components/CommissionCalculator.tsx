@@ -204,13 +204,23 @@ const CommissionCalculator = () => {
     };
   }, [data]);
 
-  const handlePrint = () => {
-    window.print();
+  const handleCustomerDetails = () => {
+    // Auto-populate collected amount with total monthly value
+    setCustomerData(prev => ({
+      ...prev,
+      collectedAmount: calculations.totalMonthlyValue.toFixed(2)
+    }));
+    setCustomerDataDialog(true);
   };
 
-  const handleActualPrint = () => {
+  const handlePrint = () => {
     setCustomerDataDialog(false);
     setTimeout(() => window.print(), 100);
+  };
+
+  const handleEmailFlow = () => {
+    setCustomerDataDialog(false);
+    setEmailDialog(true);
   };
 
   const handleEmailReport = async () => {
@@ -226,7 +236,6 @@ const CommissionCalculator = () => {
     setIsEmailSending(true);
     
     try {
-      // Generate HTML content for PDF
       const reportData = {
         email: emailAddress,
         calculationData: {
@@ -328,18 +337,10 @@ const CommissionCalculator = () => {
 
         {/* Action Buttons - Hidden in print */}
         <div className="flex justify-center gap-4 print:hidden">
-          <Button onClick={handlePrint} variant="outline" className="flex items-center gap-2">
-            <Printer className="h-4 w-4" />
-            Print Report
+          <Button onClick={handleCustomerDetails} className="flex items-center gap-2">
+            <Calculator className="h-4 w-4" />
+            Add Customer Details & Generate Report
           </Button>
-          <Dialog open={emailDialog} onOpenChange={setEmailDialog}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2" onClick={() => setCustomerDataDialog(true)}>
-                <Mail className="h-4 w-4" />
-                Email Report
-              </Button>
-            </DialogTrigger>
-          </Dialog>
         </div>
 
         {/* Customer Data Dialog */}
@@ -393,13 +394,10 @@ const CommissionCalculator = () => {
               <Button variant="outline" onClick={() => setCustomerDataDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleActualPrint}>
+              <Button onClick={handlePrint}>
                 Print Report
               </Button>
-              <Button onClick={() => {
-                setCustomerDataDialog(false);
-                setEmailDialog(true);
-              }}>
+              <Button onClick={handleEmailFlow}>
                 Continue to Email
               </Button>
             </DialogFooter>
