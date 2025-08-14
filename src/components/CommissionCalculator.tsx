@@ -238,7 +238,7 @@ const CommissionCalculator = () => {
         }
       };
 
-      const response = await fetch('/api/send-commission-report', {
+      const response = await fetch('https://yprowuaupnwspobugmox.supabase.co/functions/v1/send-commission-report', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
