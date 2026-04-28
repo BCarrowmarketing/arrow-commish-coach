@@ -1,0 +1,30 @@
+{
+  "mode": "starter",
+  "lead": "architect-lead",
+  "always_spawn": [
+    "architect-lead",
+    "qa-reviewer"
+  ],
+  "agents": [
+    {
+      "name": "architect-lead",
+      "role": "lead"
+    },
+    {
+      "name": "frontend-builder",
+      "role": "frontend"
+    },
+    {
+      "name": "backend-builder",
+      "role": "backend"
+    },
+    {
+      "name": "integration-builder",
+      "role": "integration"
+    },
+    {
+      "name": "qa-reviewer",
+      "role": "qa"
+    }
+  ]
+}
