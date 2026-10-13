@@ -146,9 +146,15 @@ serve(async (req) => {
       html: htmlReport,
     })
 
-    if (emailResponse.error) {
-      console.error('send-commission-report: Resend error', emailResponse.error.name ?? 'unknown')
-      throw new HttpError(502, 'Failed to send commission report')
+    // Resend v2 returns { data, error } and does NOT throw on API errors
+    // (e.g. "domain is not verified"). Never report success without an id.
+    // The rate-limit row stays: it was claimed before the send.
+    if (emailResponse.error || !emailResponse.data?.id) {
+      console.error('send-commission-report: Resend did not accept the email', {
+        name: emailResponse.error?.name ?? 'missing_id',
+        message: emailResponse.error?.message ?? 'no email id returned',
+      })
+      return json({ success: false, error: 'Email could not be sent' }, 502, cors)
     }
 
     return json(
