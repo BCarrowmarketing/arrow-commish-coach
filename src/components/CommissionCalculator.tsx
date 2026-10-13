@@ -260,7 +260,7 @@ const CommissionCalculator = () => {
         }
       };
 
-      const response = await fetch('https://yprowuaupnwspobugmox.supabase.co/functions/v1/send-commission-report', {
+      const response = await fetch('https://api-receipts.c-arrowmarketing.com/functions/v1/send-commission-report', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -275,6 +275,12 @@ const CommissionCalculator = () => {
         });
         setEmailDialog(false);
         setEmailAddress("");
+      } else if (response.status === 429) {
+        toast({
+          title: "Email not sent",
+          description: "Too many reports sent — please try again in an hour.",
+          variant: "destructive",
+        });
       } else {
         throw new Error('Failed to send email');
       }
