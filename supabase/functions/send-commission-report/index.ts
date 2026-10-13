@@ -12,9 +12,14 @@ const ALLOWED_ORIGINS: readonly string[] = [
 ]
 
 const IP_LIMIT_PER_HOUR = 5
+const RECIPIENT_LIMIT_PER_HOUR = 3
 const GLOBAL_LIMIT_PER_HOUR = 30
 const MAX_BODY_BYTES = 20_000
 const MAX_STRING_LEN = 200
+const MAX_BUSINESS_NAME_LEN = 80
+// The exact values the calculator's Spot Duration <Select> can send.
+const SPOT_TYPES: readonly string[] = ['10', '20', '30']
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 const MAX_EMAIL_LEN = 254
 const MAX_LOCATIONS = 1000
 const MAX_MONEY = 1_000_000_000
@@ -48,15 +53,52 @@ function json(body: unknown, status: number, cors: Record<string, string>): Resp
   })
 }
 
+// Traffic always arrives through the Cloudflare Tunnel, which sets
+// cf-connecting-ip and cannot be forged through it. x-forwarded-for is
+// caller-controlled and is NEVER read. No header -> one shared 'unknown' bucket.
 function clientIp(req: Request): string {
-  const xff = req.headers.get('x-forwarded-for')
-  if (xff) {
-    const first = xff.split(',')[0].trim()
-    if (first) return first.slice(0, 100)
-  }
   const cf = req.headers.get('cf-connecting-ip')?.trim()
   if (cf) return cf.slice(0, 100)
   return 'unknown'
+}
+
+async function ipHash(ip: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip))
+  return Array.from(new Uint8Array(digest).slice(0, 6))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+// Reject on Content-Length before reading, then cap the bytes actually read
+// (a missing or lying Content-Length cannot get past the streaming cap).
+async function readBodyCapped(req: Request, maxBytes: number): Promise<string> {
+  const declared = req.headers.get('content-length')
+  if (declared !== null) {
+    const n = Number(declared)
+    if (!Number.isFinite(n) || n < 0) throw new HttpError(400, 'Invalid Content-Length')
+    if (n > maxBytes) throw new HttpError(413, 'Request too large')
+  }
+  if (!req.body) return ''
+  const reader = req.body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.byteLength
+    if (total > maxBytes) {
+      await reader.cancel().catch(() => {})
+      throw new HttpError(413, 'Request too large')
+    }
+    chunks.push(value)
+  }
+  const buf = new Uint8Array(total)
+  let off = 0
+  for (const c of chunks) {
+    buf.set(c, off)
+    off += c.byteLength
+  }
+  return new TextDecoder().decode(buf)
 }
 
 serve(async (req) => {
@@ -77,10 +119,7 @@ serve(async (req) => {
 
   try {
     // ---- shape ----
-    const raw = await req.text()
-    if (raw.length > MAX_BODY_BYTES) {
-      throw new HttpError(413, 'Request too large')
-    }
+    const raw = await readBodyCapped(req, MAX_BODY_BYTES)
     let body: unknown
     try {
       body = JSON.parse(raw)
@@ -111,6 +150,7 @@ serve(async (req) => {
 
     // ---- rate limit: claim the send BEFORE calling Resend ----
     const ip = clientIp(req)
+    const ipTag = await ipHash(ip)
     const supabase = createClient(supabaseUrl, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     })
@@ -119,8 +159,9 @@ serve(async (req) => {
     try {
       const result = await supabase.rpc('claim_commission_report_send', {
         p_ip: ip,
-        p_recipient: email,
+        p_recipient: email.toLowerCase(),
         p_ip_limit: IP_LIMIT_PER_HOUR,
+        p_recipient_limit: RECIPIENT_LIMIT_PER_HOUR,
         p_global_limit: GLOBAL_LIMIT_PER_HOUR,
       })
       claim = result.data
@@ -129,11 +170,11 @@ serve(async (req) => {
       claimError = { code: 'exception' }
     }
     if (claimError || typeof claim !== 'string') {
-      console.error('send-commission-report: rate-limit claim failed', claimError?.code ?? 'no-result')
+      console.error('send-commission-report: claim failed', { ip: ipTag, code: claimError?.code ?? 'no-result' })
       throw new HttpError(503, 'Email service unavailable')
     }
+    console.log('send-commission-report: claim', { ip: ipTag, outcome: claim === 'ok' ? 'allowed' : claim })
     if (claim !== 'ok') {
-      console.warn('send-commission-report: rate limited', claim)
       throw new HttpError(429, 'Too many reports sent. Please try again in an hour.')
     }
 
@@ -198,14 +239,21 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;')
 }
 
-function safeText(value: unknown, field: string): string {
+function safeText(value: unknown, field: string, maxLen = MAX_STRING_LEN): string {
   if (value === undefined || value === null) return ''
   if (typeof value !== 'string' && typeof value !== 'number') {
     throw new HttpError(400, `Invalid ${field}`)
   }
   const s = String(value).trim()
-  if (s.length > MAX_STRING_LEN) throw new HttpError(400, `${field} is too long`)
+  if (s.length > maxLen) throw new HttpError(400, `${field} is too long`)
   return escapeHtml(s)
+}
+
+function validSpotType(value: unknown): string {
+  if (typeof value !== 'string' || !SPOT_TYPES.includes(value)) {
+    throw new HttpError(400, 'Invalid spotType')
+  }
+  return value
 }
 
 function finiteNumber(value: unknown, field: string, min: number, max: number): number {
@@ -272,8 +320,11 @@ function normalizeReport(data: unknown): NormalizedReport {
       throw new HttpError(400, 'Invalid customerData')
     }
     const c = d.customerData as Record<string, unknown>
-    const businessName = safeText(c.businessName, 'businessName')
+    const businessName = safeText(c.businessName, 'businessName', MAX_BUSINESS_NAME_LEN)
     const dateProposalSigned = safeText(c.dateProposalSigned, 'dateProposalSigned')
+    if (dateProposalSigned !== '' && !DATE_RE.test(dateProposalSigned)) {
+      throw new HttpError(400, 'Invalid dateProposalSigned')
+    }
     let collectedAmount = ''
     if (c.collectedAmount !== undefined && c.collectedAmount !== null && String(c.collectedAmount).trim() !== '') {
       // The UI placeholder is "$5,000.00", so tolerate a leading $ and thousands commas.
@@ -314,7 +365,7 @@ function normalizeReport(data: unknown): NormalizedReport {
 
   return {
     customer,
-    spotType: safeText(d.spotType, 'spotType'),
+    spotType: validSpotType(d.spotType),
     locations: finiteNumber(d.locations, 'locations', 0, MAX_LOCATIONS).toFixed(0),
     contractLength: finiteNumber(d.contractLength, 'contractLength', 0, 120).toFixed(0),
     isRenewal,
